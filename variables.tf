@@ -24,16 +24,25 @@ variable "enable_dns_hostnames" {
 
 variable "az_count" {
   type        = number
-  default     = 3
+  default     = 2
   description = "The number of `Availability Zones` in which subnets will be created. This cannot be greater than the number of AZ's for the region."
 }
 
-#variable "public_subnets" {
-#    type = number
-#    description = "The number of `Public` subnets to create."
-#}
-#
-#variable "private_subnets" {
-#    type = number
-#    description = "The number of `Private` subnets to create."
-#}
+variable "enable_public" {
+  type        = bool
+  default     = true
+  description = "Whether to create public subnets."
+}
+
+variable "enable_private" {
+  type        = bool
+  default     = true
+  description = "Whether to create private subnets."
+}
+
+variable "enable_isolated" {
+  type        = bool
+  default     = true
+  description = "Whether to create isolated subnets."
+}
+
