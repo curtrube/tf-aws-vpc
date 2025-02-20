@@ -4,7 +4,6 @@ locals {
   network_bits = ceil(log(var.az_count * local.subnet_tiers, 2))
   public_subnet_count = var.enable_public ? var.az_count : 0
   private_subnet_count = var.enable_private ? var.az_count : 0
-  isolated_subnet_count = var.enable_isolated ? var.az_count : 0
 }
 
 ################################################################################
@@ -100,3 +99,19 @@ resource "aws_route_table_association" "pubic" {
   subnet_id      = aws_subnet.public[count.index].id
 }
 
+resource aws_route_table "private" {
+    vpc_id = aws_vpc.main.id
+
+    tags = {
+        Name = "${local.name}-private-route-table"
+    }
+}
+
+resource "aws_route_table_association" "private" {
+  count = var.enable_private ? var.az_count : 0
+
+  route_table_id = aws_route_table.private.id
+  subnet_id      = aws_subnet.private[count.index].id
+}
+
+# TODO: add isolated subnets route table / association
