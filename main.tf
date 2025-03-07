@@ -98,6 +98,8 @@ resource "aws_route_table_association" "pubic" {
 }
 
 resource "aws_route_table" "private" {
+  // count = var.enable_private ? var.az_count : 0
+
   vpc_id = aws_vpc.main.id
 
   tags = {
@@ -112,19 +114,30 @@ resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private[count.index].id
 }
 
-# TODO: add isolated subnets route table / association
+resource "aws_route_table" "isolated" {
+  //count = var.enable_isolated ? 1 : 0
+
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "${local.name}-isolated-route-table"
+  }
+}
+
+resource "aws_route_table_association" "isolated" {
+  count = var.enable_isolated ? var.az_count : 0
+
+  route_table_id = aws_route_table.isolated.id
+  subnet_id      = aws_subnet.isolated[count.index].id
+}
 
 ################################################################################
 # Endpoints
 ################################################################################
 
 resource "aws_vpc_endpoint" "s3" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.${data.aws_region.current.name}.s3"
-}
-
-resource "aws_vpc_endpoint_route_table_association" "s3" {
-  route_table_id  = aws_route_table.private.id
-  vpc_endpoint_id = aws_vpc_endpoint.s3.id
+  vpc_id          = aws_vpc.main.id
+  route_table_ids = [aws_route_table.public.id, aws_route_table.private.id, aws_route_table.isolated.id]
+  service_name    = "com.amazonaws.${data.aws_region.current.name}.s3"
 }
 
