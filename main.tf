@@ -2,8 +2,6 @@ locals {
   name         = lower(var.name)
   subnet_tiers = max(1, (var.enable_public ? 1 : 0) + (var.enable_private ? 1 : 0) + (var.enable_isolated ? 1 : 0))
   network_bits = ceil(log(var.az_count * local.subnet_tiers, 2))
-  public_subnet_count = var.enable_public ? var.az_count : 0
-  private_subnet_count = var.enable_private ? var.az_count : 0
 }
 
 ################################################################################
@@ -42,7 +40,7 @@ resource "aws_subnet" "public" {
   vpc_id                  = aws_vpc.main.id
 
   tags = {
-    Name = "${local.name}-public-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
+    Name = "${local.name}-public-web-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
   }
 }
 
@@ -54,7 +52,7 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name = "${local.name}-private-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
+    Name = "${local.name}-private-app-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
   }
 }
 
@@ -66,7 +64,7 @@ resource "aws_subnet" "isolated" {
   vpc_id            = aws_vpc.main.id
 
   tags = {
-    Name = "${local.name}-isolated-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
+    Name = "${local.name}-isolated-db-subnet-${element(data.aws_availability_zones.available.names, count.index)}"
   }
 }
 
@@ -82,10 +80,10 @@ resource "aws_route_table" "public" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
-    #route {
-    #  ipv6_cidr_block        = "::/0"
-    #  egress_only_gateway_id = aws_egress_only_internet_gateway.example.id
-    #}
+  #route {
+  #  ipv6_cidr_block        = "::/0"
+  #  egress_only_gateway_id = aws_egress_only_internet_gateway.example.id
+  #}
 
   tags = {
     Name = "${local.name}-public-route-table"
@@ -99,12 +97,12 @@ resource "aws_route_table_association" "pubic" {
   subnet_id      = aws_subnet.public[count.index].id
 }
 
-resource aws_route_table "private" {
-    vpc_id = aws_vpc.main.id
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
 
-    tags = {
-        Name = "${local.name}-private-route-table"
-    }
+  tags = {
+    Name = "${local.name}-private-route-table"
+  }
 }
 
 resource "aws_route_table_association" "private" {

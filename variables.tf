@@ -6,7 +6,6 @@ variable "name" {
 
 variable "cidr_block" {
   type        = string
-  default     = "192.168.1.0/24"
   description = "IPv4 CIDR address assigned to the VPC"
 }
 
@@ -31,18 +30,18 @@ variable "az_count" {
 variable "enable_public" {
   type        = bool
   default     = true
-  description = "Whether to create public subnets."
+  description = "Whether to create public web subnets."
 }
 
 variable "enable_private" {
   type        = bool
   default     = true
-  description = "Whether to create private subnets."
+  description = "Whether to create private application subnets."
 }
 
 variable "enable_isolated" {
   type        = bool
   default     = true
-  description = "Whether to create isolated subnets."
+  description = "Whether to create isolated database subnets."
 }
 
