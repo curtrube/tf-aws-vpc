@@ -1,12 +1,11 @@
 variable "name" {
   type        = string
-  default     = "app-dev"
-  description = "Name of the VPC."
+  description = "`Name` used to prefix and tag resources."
 }
 
 variable "cidr_block" {
   type        = string
-  description = "IPv4 CIDR address assigned to the VPC"
+  description = "`IPv4` CIDR address assigned to the VPC."
 }
 
 variable "enable_dns_support" {

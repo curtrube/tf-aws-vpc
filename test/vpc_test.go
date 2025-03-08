@@ -1,22 +1,47 @@
 package test
 
 import (
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
-	"github.com/stretchr/testify/assert"
+	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 )
 
-// TODO: configure aws provider
+func writeProviderConfig(region, path string) error {
+    providerConfig := fmt.Sprintf(`
+provider "aws" {
+    region = "%s"
+}
+`, region)
+
+	filePath := path + "/provider.tf"
+    err := os.WriteFile(filePath, []byte(providerConfig), 0644)
+    if err != nil {
+        return fmt.Errorf("error writing provider config to file: %w", err)
+    }
+
+    return nil
+}
 
 func TestTerraformAwsVpc(t *testing.T) {
+    // Copy the terraform folder to a temp folder
+    tempTestDir := test_structure.CopyTerraformFolderToTemp(t, "../", "")
+
+    region := "us-east-1"
+    err := writeProviderConfig(region, tempTestDir)
+	if err != nil {
+        t.Fatalf("Error writing provider config to temp folder: %v", err)
+    }
+
 	// retryable errors in terraform testing.
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "../",
+		TerraformDir: tempTestDir,
         
         // Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
-            "vpc_cidr": "10.0.0.0/16",
+            "cidr_block": "10.0.0.0/16",
 		},
 	})
 
